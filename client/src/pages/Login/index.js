@@ -7,7 +7,7 @@ export default function Login(){
     return(
         <div className="login-container">
             <section className="form">
-                <img src={logoImage} alt="Logo Login"/>
+                <img src={logoImage} alt="Logo"/>
                 <form>
                     <h1>Access your account</h1>
                     <input placeholder="Username" />
