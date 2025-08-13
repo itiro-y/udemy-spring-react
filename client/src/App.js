@@ -1,11 +1,11 @@
 import React from "react";
 
 import './global.css';
-import Login from "./pages/Login";
+import AppRoutes from "./routes";
 
 export default function App() {
   return (
-      <Login />
+      <AppRoutes/>
   );
 }
 
