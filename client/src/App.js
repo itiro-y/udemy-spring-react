@@ -1,7 +1,9 @@
 
+import Header from "./Header";
+
 export default function App() {
   return (
-      <h1> Hello World </h1>
+      <Header>Client REST Udemy - Properties</Header>
   );
 }
 
