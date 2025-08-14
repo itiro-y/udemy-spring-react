@@ -1,7 +1,7 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import './styles.css';
 import logoImage from '../../assets/logo.svg';
-import {Link, useNavigate} from 'react-router-dom';
+import {Link, useNavigate, useParams} from 'react-router-dom';
 import {FiArrowLeft} from 'react-icons/fi';
 
 import api from '../../services/api';
@@ -19,7 +19,35 @@ export default function NewBook() {
 
     const navigate = useNavigate();
 
-    async function createNewBook(e){
+    const { bookId } = useParams();
+
+    useEffect(() => {
+        if(bookId === '0') return;
+        else loadBook();
+    }, {bookId})
+
+    async function loadBook(){
+        try{
+            const response = await api.get(`/api/book/v1/${bookId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            let adjustedDate = response.data.launchDate.split("T", 10)[0];
+            setId(response.data.id);
+            setAuthor(response.data.author);
+            setLaunchDate(adjustedDate);
+            setPrice(response.data.price);
+            setTitle(response.data.title);
+
+        } catch(err){
+            alert('Error recovering book, try again.');
+            navigate('/books');
+        }
+    }
+
+
+    async function saveOrUpdate(e){
         e.preventDefault();
         const data = {
             author,
@@ -28,11 +56,20 @@ export default function NewBook() {
             title
         }
         try{
-            await api.post('/api/book/v1', data, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            if(bookId === '0'){
+                await api.post('/api/book/v1', data, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            } else{
+                data.id = id;
+                await api.put('/api/book/v1', data, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            }
             navigate('/books');
         }catch (err){
             alert('Error creating book, try again.');
@@ -43,15 +80,15 @@ export default function NewBook() {
             <div className={"content"}>
                 <section className={"form"}>
                     <img src={logoImage} alt={"Logo"} />
-                    <h1>Add New Book</h1>
-                    <p>Enter the book information and click on 'Add'!</p>
+                    <h1>{bookId === '0' ? "Add":"Update"} New Book</h1>
+                    <p>Enter the book information and click on {bookId === '0' ? "Add":"Update"}!</p>
                     <Link className={"back-link"} to={"/books"}>
                         <FiArrowLeft size={16} color={"#251FC5"} />
-                        Home
+                        Back to Book
                     </Link>
                 </section>
 
-                <form onSubmit={createNewBook}>
+                <form onSubmit={saveOrUpdate}>
                     <input
                         placeholder={"Title"}
                         value={title}
@@ -73,7 +110,7 @@ export default function NewBook() {
                         onChange={e => setPrice(e.target.value)}
                     />
                     <button className={"button"} type={"submit"}>
-                        Add
+                        {(bookId === '0') ? 'Add' : 'Update'}
                     </button>
                 </form>
             </div>
